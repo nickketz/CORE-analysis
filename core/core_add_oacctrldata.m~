@@ -1,0 +1,34 @@
+function [mydata,cols] = core_add_oacctrldata(exper,ana)
+
+%add orig acc to trldata
+conds = ana.eventValues{1};
+
+for isub = 1:length(exper.subjects)
+    for icond = 1:length(conds)
+        
+        vars = exper.trldata(isub).(conds{icond}).vars;
+        vals = exper.trldata(isub).(conds{icond}).vals;
+        
+        stimcol = str
+        
+        behavdir = fullfile(dirs.dataroot,dirs.dataDir,'ses1','behav');
+        bfile = [behavdir filesep 'CORE_' exper.subjects{isub}(end-1:end) '_0.dat'];
+        indata = core_datread(bfile);
+        
+        subidx = mydata(:,subcol)==isub;
+        stims = mydata(subidx,stimcol);
+        oacc = nan(length(stims),1);
+        for istim = 1:length(stims)
+            stimidx = indata.stim == stims(istim);
+            if sum(stimidx) ~=1
+                error('multiple stim matches');
+            end
+            oacc(istim) = indata.acc(stimidx);
+        end
+        fulloacc(oaccidx+1:oaccidx+length(stims))= oacc;
+        oaccidx = oaccidx+length(stims);
+    end
+end
+
+mydata = [mydata fulloacc];
+cols = cat(2,cols,'oacc');
